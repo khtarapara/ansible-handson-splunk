@@ -1,0 +1,16 @@
+---
+- name: check splunk status
+  hosts: splunkservers
+  become: true
+  become_method: sudo
+  become_user: splunk
+  tasks:
+  - name: check splunk status
+    command: chdir=/opt/splunk/bin ./splunk status
+    register: splunk_status
+
+  - fail: msg="Splunk is not running."
+    when: "'splunkd is running' not in splunk_status.stdout"
+
+  - name: check port 8000
+    wait_for: port=8000 timeout=1

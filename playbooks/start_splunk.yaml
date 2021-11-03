@@ -1,0 +1,14 @@
+- name: Start Splunk
+  hosts: splunkservers
+  become: yes
+  become_method: sudo
+  become_user: splunk
+  tasks:
+  - name: Start splunk service
+    ansible.builtin.expect: 
+      chdir: /opt/splunk/bin
+      command: ./splunk start --accept-license
+      responses:
+        (.*)username: "admin"
+        (.*)password: "admin123"
+        (.*)password: "admin123"

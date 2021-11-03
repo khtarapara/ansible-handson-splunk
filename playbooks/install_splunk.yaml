@@ -1,0 +1,48 @@
+---
+- name: Install Splunk
+  hosts: splunkservers
+  vars_files:
+    - /etc/ansible/playbooks/variables.yaml  
+  become: yes
+  become_user: root
+  tasks:
+  - name: ensure pexpect is installed in the playbook python
+    pip:
+      name: pexpect
+      state: present
+  - name: create splunk user
+    user:
+      name: splunk
+      uid: 2001
+      shell: /bin/bash
+  - name: download splunk
+    command: 
+      chdir: /opt 
+      cmd: "wget -O /opt/splunk.tgz 'https://download.splunk.com/products/splunk/releases/{{ splunk_version }}/linux/splunk-{{ splunk_version }}-ae6821b7c64b-Linux-x86_64.tgz'"
+      creates: /opt/splunk.tgz
+  - name: untar splunk
+    command:
+      chdir: /opt
+      cmd: tar -zxf splunk.tgz
+      creates: /opt/splunk
+  - name: change ownership of /opt/splunk
+    ansible.builtin.file:
+      path: /opt/splunk
+      owner: splunk
+      group: splunk
+      state: directory
+      recurse: yes
+- name: Start Splunk
+  hosts: splunkservers
+  become: yes
+  become_method: sudo
+  become_user: splunk
+  tasks:
+  - name: Start splunk service
+    ansible.builtin.expect: 
+      chdir: /opt/splunk/bin
+      command: ./splunk start --accept-license
+      responses:
+        (.*)username: "admin"
+        (.*)password: "admin123"
+        (.*)password: "admin123"

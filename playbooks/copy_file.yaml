@@ -1,0 +1,8 @@
+---
+- name: Copy file to Splunk Servers
+  hosts: splunkservers
+  tasks:
+  - name: Copy file /home/splunker/sample.txt
+    copy:
+      src: /home/splunker/sample.txt
+      dest: /home/splunker/
